@@ -36,11 +36,13 @@ export default function AiAssistant() {
   const { toast } = useToast();
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const processedRecommendation = useRef<string | null>(null);
 
-  const handleChatSubmit = useCallback((formData: FormData) => {
-    const currentInput = formData.get('userInput') as string;
-    if (currentInput.trim()) {
-      setMessages((prev) => [...prev, { role: 'user', content: currentInput }]);
+  const handleChatSubmit = useCallback((text: string) => {
+    if (text.trim()) {
+      setMessages((prev) => [...prev, { role: 'user', content: text }]);
+      const formData = new FormData();
+      formData.append('userInput', text);
       formData.append('language', language);
       chatFormAction(formData);
       setUserInput('');
@@ -65,11 +67,7 @@ export default function AiAssistant() {
     speechRecognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setIsListening(false);
-      
-      // Automatically submit the form with the transcript
-      const formData = new FormData();
-      formData.append('userInput', transcript);
-      handleChatSubmit(formData);
+      handleChatSubmit(transcript);
     };
 
     speechRecognition.onerror = (event) => {
@@ -92,25 +90,25 @@ export default function AiAssistant() {
   }, [toast, handleChatSubmit]);
 
   useEffect(() => {
-    if (chatState) {
-        if ('recommendation' in chatState && chatState.recommendation) {
-          const newMessage: Message = { role: 'assistant', content: chatState.recommendation };
-          setMessages((prev) => [...prev, newMessage]);
+    if (chatState && 'recommendation' in chatState && chatState.recommendation) {
+        if (processedRecommendation.current !== chatState.recommendation) {
+            const newMessage: Message = { role: 'assistant', content: chatState.recommendation };
+            setMessages((prev) => [...prev, newMessage]);
 
-          const formData = new FormData();
-          formData.append('text', chatState.recommendation);
-          formData.append('language', chatState.language);
-          startAudioTransition(() => {
-            audioFormAction(formData);
-          });
-
-        } else if ('error' in chatState && chatState.error) {
-          toast({
+            const formData = new FormData();
+            formData.append('text', chatState.recommendation);
+            formData.append('language', chatState.language);
+            startAudioTransition(() => {
+                audioFormAction(formData);
+            });
+            processedRecommendation.current = chatState.recommendation;
+        }
+    } else if (chatState && 'error' in chatState && chatState.error) {
+        toast({
             variant: "destructive",
             title: "AI Error",
             description: chatState.error,
-          });
-        }
+        });
     }
   }, [chatState, toast, audioFormAction, startAudioTransition]);
 
@@ -120,7 +118,7 @@ export default function AiAssistant() {
         setMessages((prevMessages) => {
           const newMessages = [...prevMessages];
           const lastMessage = newMessages[newMessages.length - 1];
-          if (lastMessage && lastMessage.role === 'assistant') {
+          if (lastMessage && lastMessage.role === 'assistant' && !lastMessage.audioUrl) {
             lastMessage.audioUrl = audioState.audio;
           }
           return newMessages;
@@ -159,6 +157,11 @@ export default function AiAssistant() {
       }
     }
   };
+  
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleChatSubmit(userInput);
+  }
 
   const playAudio = (audioUrl: string) => {
     if(audioRef.current){
@@ -231,7 +234,7 @@ export default function AiAssistant() {
                 )}
               </div>
             </ScrollArea>
-            <form action={handleChatSubmit} className="mt-4 space-y-4">
+            <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
               <div className="relative">
                 <Textarea
                   name="userInput"
