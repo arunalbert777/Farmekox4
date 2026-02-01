@@ -2,7 +2,7 @@ import { FirebaseOptions } from 'firebase/app';
 
 // This is the configuration for your new Firebase project.
 const firebaseConfig: FirebaseOptions = {
-  apiKey: "AIzaSyCuUD99id6Z4NUQXNmQHtAID4bzx1PRyFM",
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
   authDomain: "farmekox4-94882690-a08b5.firebaseapp.com",
   projectId: "farmekox4-94882690-a08b5",
   storageBucket: "farmekox4-94882690-a08b5.appspot.com",
