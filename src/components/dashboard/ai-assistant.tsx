@@ -27,6 +27,7 @@ let speechRecognition: SpeechRecognition | null = null;
 export default function AiAssistant() {
   const [chatState, chatFormAction, isChatPending] = useActionState(getAiRecommendation, initialChatState);
   const [audioState, audioFormAction, isAudioPending] = useActionState(getAudioForText, initialAudioState);
+  const [isChatTransitionPending, startChatTransition] = useTransition();
   const [isAudioTransitionPending, startAudioTransition] = useTransition();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -44,10 +45,12 @@ export default function AiAssistant() {
       const formData = new FormData();
       formData.append('userInput', text);
       formData.append('language', language);
-      chatFormAction(formData);
+      startChatTransition(() => {
+        chatFormAction(formData);
+      });
       setUserInput('');
     }
-  }, [language, chatFormAction]);
+  }, [language, chatFormAction, startChatTransition]);
 
   useEffect(() => {
     if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
@@ -171,7 +174,7 @@ export default function AiAssistant() {
   };
 
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
-  const isProcessing = isChatPending || isAudioPending || isAudioTransitionPending;
+  const isProcessing = isChatPending || isAudioPending || isAudioTransitionPending || isChatTransitionPending;
 
   return (
     <Card className="h-full flex flex-col">
