@@ -46,15 +46,24 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       const appVerifier = window.recaptchaVerifier!;
-      const confirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
+      
+      let phoneNumber = phone;
+      if (!phoneNumber.startsWith('+')) {
+        // Assuming a 10 digit Indian number if no country code is given, based on the placeholder.
+        phoneNumber = `+91${phoneNumber.replace(/\s/g, '')}`;
+      }
+
+      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
       window.confirmationResult = confirmationResult;
       setStep(2);
-      toast({ title: 'OTP Sent!', description: `An OTP has been sent to ${phone}` });
+      toast({ title: 'OTP Sent!', description: `An OTP has been sent to ${phoneNumber}` });
     } catch (error: any) {
       console.error("Error sending OTP:", error);
       let description = error.message || 'Please try again.';
       if (error.code === 'auth/configuration-not-found') {
           description = 'Phone sign-in is not enabled for this project. Please enable it in the Firebase Console (Authentication > Sign-in method) and add your domain to the list of authorized domains.';
+      } else if (error.code === 'auth/invalid-phone-number') {
+        description = 'The phone number format is invalid. Please use the E.164 format (e.g. +919876543210).';
       }
 
       toast({
