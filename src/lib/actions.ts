@@ -20,7 +20,7 @@ import {
 export async function getAiRecommendation(
   prevState: any,
   formData: FormData
-): Promise<{ recommendation: string, language: string } | { error: string }> {
+): Promise<{ id: string; recommendation: string; language: string } | { error: string }> {
   try {
     const language = formData.get('language') as 'en' | 'kn';
     const input: CropRecommendationViaChatInput = {
@@ -28,7 +28,7 @@ export async function getAiRecommendation(
         language: language,
     };
     const result = await cropRecommendationViaChat(input);
-    return { recommendation: result.recommendation, language: language };
+    return { id: `${Date.now()}-${Math.random()}`, recommendation: result.recommendation, language: language };
   } catch (e) {
     console.error(e);
     return { error: 'Failed to get recommendation from AI.' };

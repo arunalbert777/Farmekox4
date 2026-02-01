@@ -19,7 +19,7 @@ interface Message {
   audioUrl?: string;
 }
 
-const initialChatState: { recommendation: string; language: string } | { error: string } | null = null;
+const initialChatState: { id: string; recommendation: string; language: string } | { error: string } | null = null;
 const initialAudioState: { audio: string } | { error: string } | null = null;
 
 let speechRecognition: SpeechRecognition | null = null;
@@ -38,7 +38,7 @@ export default function AiAssistant() {
   const { toast } = useToast();
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const processedRecommendation = useRef<string | null>(null);
+  const processedId = useRef<string | null>(null);
 
   const handleChatSubmit = useCallback((text: string) => {
     if (text.trim()) {
@@ -95,7 +95,7 @@ export default function AiAssistant() {
 
   useEffect(() => {
     if (chatState && 'recommendation' in chatState && chatState.recommendation) {
-        if (processedRecommendation.current !== chatState.recommendation) {
+        if (processedId.current !== chatState.id) {
             const newMessage: Message = { role: 'assistant', content: chatState.recommendation };
             setMessages((prev) => [...prev, newMessage]);
 
@@ -105,7 +105,7 @@ export default function AiAssistant() {
             startAudioTransition(() => {
                 audioFormAction(formData);
             });
-            processedRecommendation.current = chatState.recommendation;
+            processedId.current = chatState.id;
         }
     } else if (chatState && 'error' in chatState && chatState.error) {
         toast({
