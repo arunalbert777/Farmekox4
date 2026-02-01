@@ -14,6 +14,7 @@ import {z} from 'genkit';
 
 const CropRecommendationViaChatInputSchema = z.object({
   userInput: z.string().describe('The user input / question about crop recommendations. This should include details like location, weather, soil conditions, and crop type if the user has a preference.'),
+  language: z.enum(['en', 'kn']).describe('The language for the response.'),
 });
 
 export type CropRecommendationViaChatInput = z.infer<typeof CropRecommendationViaChatInputSchema>;
@@ -35,6 +36,8 @@ const cropRecommendationPrompt = ai.definePrompt({
   prompt: `You are an AI assistant specializing in providing crop recommendations to farmers.
 
   The user will provide details about their farming conditions in the input. Based on the following user input, provide a clear and concise crop recommendation.
+
+  Respond in the language specified: {{{language}}}. 'kn' is for Kannada. 'en' is for English.
 
   User Input: {{{userInput}}}
   `,

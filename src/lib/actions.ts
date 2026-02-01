@@ -8,17 +8,23 @@ import {
     identifyFertilizerAndRecommend,
     type FertilizerIdentificationAndRecommendationInput
 } from '@/ai/flows/fertilizer-identification-recommendation'
+import {
+  textToSpeech,
+  type TextToSpeechInput,
+} from '@/ai/flows/text-to-speech';
 
 export async function getAiRecommendation(
   prevState: any,
   formData: FormData
-): Promise<{ recommendation: string } | { error: string }> {
+): Promise<{ recommendation: string, language: string } | { error: string }> {
   try {
+    const language = formData.get('language') as 'en' | 'kn';
     const input: CropRecommendationViaChatInput = {
         userInput: formData.get('userInput') as string,
+        language: language,
     };
     const result = await cropRecommendationViaChat(input);
-    return { recommendation: result.recommendation };
+    return { recommendation: result.recommendation, language: language };
   } catch (e) {
     console.error(e);
     return { error: 'Failed to get recommendation from AI.' };
@@ -46,4 +52,21 @@ export async function getFertilizerId(
         console.error(e);
         return { error: 'Failed to get fertilizer identification from AI.' };
     }
+}
+
+export async function getAudioForText(
+  prevState: any,
+  formData: FormData
+): Promise<{ audio: string } | { error: string }> {
+  try {
+    const input: TextToSpeechInput = {
+      text: formData.get('text') as string,
+      language: formData.get('language') as 'en' | 'kn',
+    };
+    const result = await textToSpeech(input);
+    return { audio: result.audio };
+  } catch (e) {
+    console.error(e);
+    return { error: 'Failed to generate audio.' };
+  }
 }
