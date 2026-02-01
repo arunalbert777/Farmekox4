@@ -18,7 +18,8 @@ jobs:
         run: echo "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}" > .env.local
       - run: npm install
       - run: npm run build
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-      - name: Deploy to Firebase Hosting
-        run: firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}" --project farmekox4-94882690-a08b5
+      - uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
