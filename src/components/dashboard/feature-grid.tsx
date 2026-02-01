@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BarChart, CalendarDays, Map, Bot, TestTube } from 'lucide-react';
+import { BarChart, CalendarDays, Map, Bot, TestTube, Bug } from 'lucide-react';
 
 const features = [
   {
@@ -32,6 +32,12 @@ const features = [
     description: 'Identify from barcode',
     href: '/fertilizer-id',
     icon: TestTube,
+  },
+  {
+    title: 'Pest & Disease ID',
+    description: 'Identify crop issues',
+    href: '/pest-disease-id',
+    icon: Bug,
   },
 ];
 
