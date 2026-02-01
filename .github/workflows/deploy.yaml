@@ -18,8 +18,7 @@ jobs:
         run: echo "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}" > .env.local
       - run: npm install
       - run: npm run build
-      - name: Deploy to Firebase
-        uses: ./
-        with:
-          path: .next
-          appType: server
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+      - name: Deploy to Firebase Hosting
+        run: firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}" --project farmekox4-94882690-a08b5
