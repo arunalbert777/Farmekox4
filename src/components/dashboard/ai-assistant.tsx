@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Send, Mic, Bot, User, Loader2, Volume2, MicOff } from 'lucide-react';
+import { Send, Mic, Bot, User, Loader2, Volume2, MicOff, StopCircle } from 'lucide-react';
 import { getAiRecommendation, getAudioForText } from '@/lib/actions';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +34,7 @@ export default function AiAssistant() {
   const [language, setLanguage] = useState<'en' | 'kn'>('en');
   const [isListening, setIsListening] = useState(false);
   const [userInput, setUserInput] = useState('');
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const { toast } = useToast();
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -128,6 +129,10 @@ export default function AiAssistant() {
         });
 
         if (audioRef.current) {
+          if (!audioRef.current.paused) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+          }
           audioRef.current.src = audioState.audio;
           audioRef.current.play();
         }
@@ -167,9 +172,20 @@ export default function AiAssistant() {
   }
 
   const playAudio = (audioUrl: string) => {
-    if(audioRef.current){
-        audioRef.current.src = audioUrl;
-        audioRef.current.play();
+    if (audioRef.current) {
+      if (!audioRef.current.paused) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      audioRef.current.src = audioUrl;
+      audioRef.current.play();
+    }
+  };
+
+  const handleStopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
   };
 
@@ -249,16 +265,28 @@ export default function AiAssistant() {
                   disabled={isProcessing}
                 />
                 <div className="absolute top-1/2 -translate-y-1/2 right-3 flex items-center gap-1">
-                    <Button type="button" size="icon" variant={isListening ? "destructive" : "ghost"} onClick={handleMicClick} disabled={isProcessing}>
+                    <Button type="button" size="icon" variant={isListening ? "destructive" : "ghost"} onClick={handleMicClick} disabled={isProcessing || isSpeaking}>
                         {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                     </Button>
-                    <Button type="submit" size="icon" variant="ghost" disabled={isProcessing}>
+                    {isSpeaking ? (
+                       <Button type="button" size="icon" variant="destructive" onClick={handleStopAudio}>
+                         <StopCircle className="h-4 w-4" />
+                       </Button>
+                    ) : (
+                       <Button type="submit" size="icon" variant="ghost" disabled={isProcessing}>
                         <Send className="h-4 w-4" />
-                    </Button>
+                       </Button>
+                    )}
                 </div>
               </div>
             </form>
-            <audio ref={audioRef} className="hidden" />
+            <audio 
+                ref={audioRef} 
+                className="hidden" 
+                onPlay={() => setIsSpeaking(true)} 
+                onPause={() => setIsSpeaking(false)}
+                onEnded={() => setIsSpeaking(false)}
+            />
           </CardContent>
     </Card>
   );
