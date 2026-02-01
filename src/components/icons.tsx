@@ -14,10 +14,10 @@ export function FarmekoLogo(props: SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
-      <path d="M12 22c-5 0-9-4.5-9-9.5S4.5 3 9.5 3c2.2 0 4.2 1 5.5 2.5" />
-      <path d="M12 22c5 0 9-4.5 9-9.5s-4.5-9.5-9.5-9.5" />
-      <path d="M7 10s1.5 2 5 2 5-2 5-2" />
-      <path d="M10.5 14c-1.5.5-3 0-3-1.5s1.5-2 3-1.5" />
+      <path d="M7 20h10" />
+      <path d="M12 20V4" />
+      <path d="M12 4H8c0 4.4 4 8 4 8" />
+      <path d="M12 4h4c0 4.4-4 8-4 8" />
     </svg>
   );
 }
