@@ -43,7 +43,7 @@ const features = [
 
 export default function FeatureGrid() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {features.map((feature) => (
         <Link href={feature.href} key={feature.href} className="flex">
           <Card className="w-full hover:bg-muted/50 transition-colors">

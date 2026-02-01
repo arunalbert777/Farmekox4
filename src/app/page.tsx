@@ -17,12 +17,13 @@ export default function DashboardPage() {
             <main className="flex flex-1 flex-col gap-8 p-4 md:p-8">
                 <Skeleton className="h-[150px] w-full" />
                  <div>
-                    <h2 className="text-3xl font-bold tracking-tight mb-4">All Features</h2>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <h2 className="text-3xl font-bold tracking-tight mb-4">FarmekoX Features</h2>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <Skeleton className="h-[160px] w-full" />
                         <Skeleton className="h-[160px] w-full" />
                         <Skeleton className="h-[160px] w-full" />
                         <Skeleton className="h-[160px] w-full" />
+                         <Skeleton className="h-[160px] w-full" />
                          <Skeleton className="h-[160px] w-full" />
                     </div>
                 </div>
@@ -41,7 +42,7 @@ export default function DashboardPage() {
       <main className="flex flex-1 flex-col gap-8 p-4 md:p-8">
         <WeatherCard />
         <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-4">All Features</h2>
+          <h2 className="text-3xl font-bold tracking-tight mb-4">FarmekoX Features</h2>
           <FeatureGrid />
         </div>
       </main>

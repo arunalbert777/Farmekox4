@@ -9,6 +9,10 @@ import {
     type FertilizerIdentificationAndRecommendationInput
 } from '@/ai/flows/fertilizer-identification-recommendation'
 import {
+  identifyPestOrDisease,
+  type IdentifyPestOrDiseaseInput,
+} from '@/ai/flows/pest-disease-identification';
+import {
   textToSpeech,
   type TextToSpeechInput,
 } from '@/ai/flows/text-to-speech';
@@ -52,6 +56,31 @@ export async function getFertilizerId(
         console.error(e);
         return { error: 'Failed to get fertilizer identification from AI.' };
     }
+}
+
+export async function getPestOrDiseaseId(
+  prevState: any,
+  formData: FormData
+): Promise<
+  | { result: { isPlant: boolean; isHealthy: boolean; details: string } }
+  | { error: string }
+> {
+  try {
+    const input: IdentifyPestOrDiseaseInput = {
+      photoDataUri: formData.get('photoDataUri') as string,
+    };
+    const result = await identifyPestOrDisease(input);
+    return {
+      result: {
+        isPlant: result.identification.isPlant,
+        isHealthy: result.diagnosis.isHealthy,
+        details: `**Plant:** ${result.identification.commonName} (${result.identification.latinName})\n\n**Diagnosis:** ${result.diagnosis.diagnosis}`,
+      },
+    };
+  } catch (e) {
+    console.error(e);
+    return { error: 'Failed to identify pest or disease from AI.' };
+  }
 }
 
 export async function getAudioForText(
