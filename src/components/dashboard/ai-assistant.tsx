@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useActionState } from 'react';
+import { useState, useRef, useEffect, useActionState, useTransition } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,6 +27,7 @@ let speechRecognition: SpeechRecognition | null = null;
 export default function AiAssistant() {
   const [chatState, chatFormAction, isChatPending] = useActionState(getAiRecommendation, initialChatState);
   const [audioState, audioFormAction, isAudioPending] = useActionState(getAudioForText, initialAudioState);
+  const [isAudioTransitionPending, startAudioTransition] = useTransition();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [language, setLanguage] = useState<'en' | 'kn'>('en');
@@ -85,7 +86,9 @@ export default function AiAssistant() {
           const formData = new FormData();
           formData.append('text', chatState.recommendation);
           formData.append('language', chatState.language);
-          audioFormAction(formData);
+          startAudioTransition(() => {
+            audioFormAction(formData);
+          });
 
         } else if ('error' in chatState && chatState.error) {
           toast({
@@ -161,6 +164,7 @@ export default function AiAssistant() {
   };
 
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
+  const isProcessing = isChatPending || isAudioPending || isAudioTransitionPending;
 
   return (
     <Card className="h-full flex flex-col">
@@ -176,6 +180,7 @@ export default function AiAssistant() {
                   id="language-toggle" 
                   checked={language === 'kn'}
                   onCheckedChange={(checked) => setLanguage(checked ? 'kn' : 'en')}
+                  disabled={isProcessing}
                 />
                 <Label htmlFor="language-toggle" className="text-sm font-medium">KN</Label>
             </div>
@@ -198,6 +203,9 @@ export default function AiAssistant() {
                           <Volume2 className="h-4 w-4" />
                         </Button>
                       )}
+                       {message.role === 'assistant' && !message.audioUrl && isProcessing && index === messages.length - 1 && (
+                          <Loader2 className="h-4 w-4 mt-1 animate-spin" />
+                       )}
                     </div>
                     {message.role === 'user' && (
                       <Avatar className="h-8 w-8">
@@ -228,12 +236,13 @@ export default function AiAssistant() {
                   required
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
+                  disabled={isProcessing}
                 />
                 <div className="absolute top-1/2 -translate-y-1/2 right-3 flex items-center gap-1">
-                    <Button type="button" size="icon" variant={isListening ? "destructive" : "ghost"} onClick={handleMicClick}>
+                    <Button type="button" size="icon" variant={isListening ? "destructive" : "ghost"} onClick={handleMicClick} disabled={isProcessing}>
                         {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                     </Button>
-                    <Button type="submit" size="icon" variant="ghost" disabled={isChatPending}>
+                    <Button type="submit" size="icon" variant="ghost" disabled={isProcessing}>
                         <Send className="h-4 w-4" />
                     </Button>
                 </div>
