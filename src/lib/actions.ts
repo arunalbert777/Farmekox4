@@ -10,9 +10,13 @@ import {
 } from '@/ai/flows/fertilizer-identification-recommendation'
 
 export async function getAiRecommendation(
-  input: CropRecommendationViaChatInput
+  prevState: any,
+  formData: FormData
 ): Promise<{ recommendation: string } | { error: string }> {
   try {
+    const input: CropRecommendationViaChatInput = {
+        userInput: formData.get('userInput') as string,
+    };
     const result = await cropRecommendationViaChat(input);
     return { recommendation: result.recommendation };
   } catch (e) {
@@ -22,14 +26,18 @@ export async function getAiRecommendation(
 }
 
 export async function getFertilizerId(
-    input: FertilizerIdentificationAndRecommendationInput
+    prevState: any,
+    formData: FormData
 ): Promise<{ result: string } | { error: string }> {
     try {
-        // In a real app, you'd get this from a file upload.
-        // For demonstration, we're using a placeholder.
-        if (!input.barcodePhotoDataUri) {
-            input.barcodePhotoDataUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-        }
+        const input: FertilizerIdentificationAndRecommendationInput = {
+            cropType: formData.get('cropType') as string,
+            location: formData.get('location') as string,
+            weatherConditions: formData.get('weatherConditions') as string,
+            // In a real app, you'd get this from a file upload.
+            // For demonstration, we're using a placeholder.
+            barcodePhotoDataUri: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+        };
 
         const result = await identifyFertilizerAndRecommend(input);
         const formattedResult = `**Fertilizer:** ${result.fertilizerIdentification}\n\n**Recommendations:** ${result.usageRecommendations}`;

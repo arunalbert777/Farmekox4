@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BarChart, CalendarDays, Map, Bot } from 'lucide-react';
+import { BarChart, CalendarDays, Map, Bot, TestTube } from 'lucide-react';
 
 const features = [
   {
     title: 'AI Assistant',
-    description: 'Crop & fertilizer advice',
+    description: 'Get crop advice',
     href: '/ai-assistant',
     icon: Bot,
   },
@@ -26,6 +26,12 @@ const features = [
     description: 'Find stores & mandis',
     href: '/map-view',
     icon: Map,
+  },
+  {
+    title: 'Fertilizer ID',
+    description: 'Identify from barcode',
+    href: '/fertilizer-id',
+    icon: TestTube,
   },
 ];
 
