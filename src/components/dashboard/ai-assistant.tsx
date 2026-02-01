@@ -54,6 +54,7 @@ export default function AiAssistant() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // @ts-ignore
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         speechRecognition.current = new SpeechRecognition();
