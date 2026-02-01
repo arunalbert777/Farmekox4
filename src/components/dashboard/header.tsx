@@ -32,6 +32,20 @@ export default function Header() {
     router.push('/login');
   };
 
+  const getDropdownLabel = () => {
+    if (!user) return 'My Account';
+    if (user.isAnonymous) return 'Guest User';
+    return user.phoneNumber || 'User';
+  };
+
+  const getAvatarFallback = () => {
+    if (!user) return 'U';
+    if (user.isAnonymous) return 'G';
+    if (user.displayName) return user.displayName.charAt(0).toUpperCase();
+    if (user.phoneNumber) return user.phoneNumber.slice(-2);
+    return 'U';
+  };
+
 
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6 z-10">
@@ -74,16 +88,16 @@ export default function Header() {
                     <Avatar className="h-8 w-8">
                         {user && user.photoURL ? (
                            <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
-                        ) : userAvatar && (
+                        ) : user && !user.isAnonymous && userAvatar ? (
                            <AvatarImage src={userAvatar.imageUrl} alt={userAvatar.description} data-ai-hint={userAvatar.imageHint} />
-                        )}
-                        <AvatarFallback>{user?.displayName?.charAt(0) || (user?.phoneNumber ? user.phoneNumber.slice(-2) : 'U')}</AvatarFallback>
+                        ) : null}
+                        <AvatarFallback>{getAvatarFallback()}</AvatarFallback>
                     </Avatar>
                     <span className="sr-only">Toggle user menu</span>
                 </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{user ? user.phoneNumber : 'My Account'}</DropdownMenuLabel>
+                <DropdownMenuLabel>{getDropdownLabel()}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Settings</DropdownMenuItem>
                 <DropdownMenuItem>Support</DropdownMenuItem>

@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sprout } from '@/components/icons';
 import { useAuth } from '@/firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, signInAnonymously } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
@@ -28,10 +28,11 @@ export default function LoginPage() {
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [guestSubmitting, setGuestSubmitting] = useState(false);
 
   useEffect(() => {
     if (!auth) return;
-    if (!window.recaptchaVerifier) {
+    if (step === 1 && !window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
         'callback': (response: any) => {
@@ -39,7 +40,7 @@ export default function LoginPage() {
         }
       });
     }
-  }, [auth]);
+  }, [auth, step]);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +58,8 @@ export default function LoginPage() {
       window.confirmationResult = confirmationResult;
       setStep(2);
       toast({ title: 'OTP Sent!', description: `An OTP has been sent to ${phoneNumber}` });
-    } catch (error: any) {
+    } catch (error: any)
+      {
       console.error("Error sending OTP:", error);
       let description = error.message || 'Please try again.';
       if (error.code === 'auth/configuration-not-found') {
@@ -72,14 +74,15 @@ export default function LoginPage() {
         description: description,
       });
       
-      // It's possible for reCAPTCHA to expire, so we can try to re-render it.
-      window.recaptchaVerifier?.render().then(widgetId => {
-        // @ts-ignore
-        if (window.grecaptcha) {
-          // @ts-ignore
-          window.grecaptcha.reset(widgetId);
-        }
-      });
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.render().then(widgetId => {
+            // @ts-ignore
+            if (window.grecaptcha) {
+            // @ts-ignore
+            window.grecaptcha.reset(widgetId);
+            }
+        });
+      }
 
     } finally {
       setIsSubmitting(false);
@@ -106,6 +109,27 @@ export default function LoginPage() {
     }
   };
 
+  const handleGuestLogin = async () => {
+    if (!auth) return;
+    setGuestSubmitting(true);
+    try {
+        await signInAnonymously(auth);
+        toast({ title: 'Success!', description: "You've logged in as a guest." });
+        router.push('/');
+    } catch (error: any) {
+        console.error("Error signing in as guest:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Guest login failed',
+            description: error.message || 'Could not sign in as guest.',
+        });
+    } finally {
+        setGuestSubmitting(false);
+    }
+  };
+  
+  const anySubmitting = isSubmitting || guestSubmitting;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
@@ -128,10 +152,10 @@ export default function LoginPage() {
                   required 
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  disabled={isSubmitting}
+                  disabled={anySubmitting}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={anySubmitting}>
                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isSubmitting ? 'Sending...' : 'Send OTP'}
               </Button>
@@ -157,7 +181,28 @@ export default function LoginPage() {
               </Button>
             </form>
           )}
-          <div id="recaptcha-container" className="my-4" />
+
+          {step === 1 && (
+            <>
+                <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                        Or continue with
+                        </span>
+                    </div>
+                </div>
+
+                <Button variant="outline" className="w-full" onClick={handleGuestLogin} disabled={anySubmitting}>
+                    {guestSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Guest Login
+                </Button>
+            </>
+          )}
+
+          <div id="recaptcha-container" className="mt-4" />
         </CardContent>
         <CardFooter className="flex justify-center">
            {step === 2 && (

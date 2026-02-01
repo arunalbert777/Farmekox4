@@ -18,7 +18,7 @@
     }
   },
   "auth": {
-    "providers": ["phone"]
+    "providers": ["phone", "anonymous"]
   },
   "firestore": {
     "/users/{userId}": {
