@@ -15,8 +15,9 @@ export function FarmekoLogo(props: SVGProps<SVGSVGElement>) {
       {...props}
     >
       <path d="M7 20h10"/>
-      <path d="M10 20c5.5-16 0-16-5.5-16"/>
-      <path d="M14 20c-5.5-16 0-16 5.5-16"/>
+      <path d="M12 20V4"/>
+      <path d="M12 4c-2.22 0-4 1.78-4 4s1.78 4 4 4 4-1.78 4-4-1.78-4-4-4z"/>
+      <path d="M12 4c2.22 0 4 1.78 4 4s-1.78 4-4 4"/>
     </svg>
   );
 }
