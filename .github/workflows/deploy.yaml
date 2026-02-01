@@ -21,5 +21,7 @@ jobs:
       - uses: w9jds/firebase-action@master
         with:
           args: deploy --only hosting
+          project_id: farmekox4-94882690-a08b5
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          PROJECT_PATH: ./
