@@ -15,7 +15,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { FarmekoLogo } from '@/components/icons';
+import { Sprout } from '@/components/icons';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
@@ -37,7 +37,7 @@ export default function Header() {
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6 z-10">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <Link href="/" className="flex items-center gap-2 text-lg font-semibold md:text-base">
-          <FarmekoLogo className="h-6 w-6 text-primary" />
+          <Sprout className="h-6 w-6 text-primary" />
           <span className="font-headline text-foreground">FarmekoX</span>
         </Link>
       </nav>
@@ -51,7 +51,7 @@ export default function Header() {
         <SheetContent side="left">
           <nav className="grid gap-6 text-lg font-medium">
             <Link href="#" className="flex items-center gap-2 text-lg font-semibold">
-              <FarmekoLogo className="h-6 w-6 text-primary" />
+              <Sprout className="h-6 w-6 text-primary" />
               <span className="sr-only">FarmekoX</span>
             </Link>
           </nav>
