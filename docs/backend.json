@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user's profile information.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The user's unique ID."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The user's phone number."
+        }
+      },
+      "required": ["uid"]
+    }
+  },
+  "auth": {
+    "providers": ["phone"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/backend/entities/UserProfile"
+      },
+      "description": "Stores user profile information."
+    }
+  }
+}

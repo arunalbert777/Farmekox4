@@ -1,34 +1,94 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FarmekoLogo } from '@/components/icons';
+import { useAuth } from '@/firebase';
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
+
+// Extend Window interface to include recaptchaVerifier
+declare global {
+  interface Window {
+    recaptchaVerifier?: RecaptchaVerifier;
+    confirmationResult?: ConfirmationResult;
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter();
+  const auth = useAuth();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!auth) return;
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': (response: any) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        }
+      });
+    }
+  }, [auth]);
+
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd call Firebase Auth here.
-    console.log(`Sending OTP to ${phone}`);
-    setStep(2);
+    setIsSubmitting(true);
+    try {
+      const appVerifier = window.recaptchaVerifier!;
+      const confirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
+      window.confirmationResult = confirmationResult;
+      setStep(2);
+      toast({ title: 'OTP Sent!', description: `An OTP has been sent to ${phone}` });
+    } catch (error: any) {
+      console.error("Error sending OTP:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to send OTP",
+        description: error.message || 'Please try again.',
+      });
+      
+      // It's possible for reCAPTCHA to expire, so we can try to re-render it.
+      window.recaptchaVerifier?.render().then(widgetId => {
+        // @ts-ignore
+        if (window.grecaptcha) {
+          // @ts-ignore
+          window.grecaptcha.reset(widgetId);
+        }
+      });
+
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd verify the OTP here.
-    console.log(`Verifying OTP ${otp}`);
-    if (otp === '123456') { // Mock OTP
+    setIsSubmitting(true);
+    try {
+      const confirmationResult = window.confirmationResult!;
+      await confirmationResult.confirm(otp);
+      toast({ title: "Success!", description: "You've been logged in."});
       router.push('/');
-    } else {
-      alert('Invalid OTP. Please use 123456 for this demo.');
+    } catch (error: any) {
+      console.error("Error verifying OTP:", error);
+       toast({
+        variant: "destructive",
+        title: "Invalid OTP",
+        description: 'The OTP you entered is incorrect. Please try again.',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -54,10 +114,12 @@ export default function LoginPage() {
                   required 
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
-              <Button type="submit" className="w-full">
-                Send OTP
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting ? 'Sending...' : 'Send OTP'}
               </Button>
             </form>
           )}
@@ -72,17 +134,20 @@ export default function LoginPage() {
                   required 
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
-              <Button type="submit" className="w-full">
-                Verify & Login
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                 {isSubmitting ? 'Verifying...' : 'Verify & Login'}
               </Button>
             </form>
           )}
+          <div id="recaptcha-container" className="my-4" />
         </CardContent>
         <CardFooter className="flex justify-center">
            {step === 2 && (
-             <Button variant="link" size="sm" onClick={() => setStep(1)}>
+             <Button variant="link" size="sm" onClick={() => setStep(1)} disabled={isSubmitting}>
                 Change phone number?
               </Button>
            )}
