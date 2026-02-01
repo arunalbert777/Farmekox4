@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useActionState, useTransition } from 'react';
+import { useState, useRef, useEffect, useActionState, useTransition, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,6 +37,16 @@ export default function AiAssistant() {
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  const handleChatSubmit = useCallback((formData: FormData) => {
+    const currentInput = formData.get('userInput') as string;
+    if (currentInput.trim()) {
+      setMessages((prev) => [...prev, { role: 'user', content: currentInput }]);
+      formData.append('language', language);
+      chatFormAction(formData);
+      setUserInput('');
+    }
+  }, [language, chatFormAction]);
+
   useEffect(() => {
     if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       toast({
@@ -54,8 +64,12 @@ export default function AiAssistant() {
 
     speechRecognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      setUserInput(transcript);
       setIsListening(false);
+      
+      // Automatically submit the form with the transcript
+      const formData = new FormData();
+      formData.append('userInput', transcript);
+      handleChatSubmit(formData);
     };
 
     speechRecognition.onerror = (event) => {
@@ -75,7 +89,7 @@ export default function AiAssistant() {
       setIsListening(false);
     };
 
-  }, [toast]);
+  }, [toast, handleChatSubmit]);
 
   useEffect(() => {
     if (chatState) {
@@ -134,16 +148,6 @@ export default function AiAssistant() {
       });
     }
   }, [messages]);
-
-  const handleChatSubmit = (formData: FormData) => {
-    const currentInput = formData.get('userInput') as string;
-    if (currentInput.trim()) {
-      setMessages((prev) => [...prev, { role: 'user', content: currentInput }]);
-      formData.append('language', language);
-      chatFormAction(formData);
-      setUserInput('');
-    }
-  };
 
   const handleMicClick = () => {
     if (isListening) {
