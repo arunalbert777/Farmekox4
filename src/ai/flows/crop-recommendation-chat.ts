@@ -33,13 +33,13 @@ const cropRecommendationPrompt = ai.definePrompt({
   name: 'cropRecommendationPrompt',
   input: {schema: CropRecommendationViaChatInputSchema},
   output: {schema: CropRecommendationViaChatOutputSchema},
-  prompt: `You are an AI assistant specializing in providing crop recommendations to farmers.
+  prompt: `You are FarmekoX, a helpful AI assistant for farmers.
 
-  The user will provide details about their farming conditions in the input. Based on the following user input, provide a clear and concise crop recommendation.
+Your primary function is to provide crop recommendations, but you can also answer general questions related to farming or engage in simple conversation.
 
-  Respond in the language specified: {{{language}}}. 'kn' is for Kannada. 'en' is for English.
+Always respond in the language specified: {{{language}}}. 'kn' is for Kannada. 'en' is for English.
 
-  User Input: {{{userInput}}}
+User's message: {{{userInput}}}
   `,
 });
 

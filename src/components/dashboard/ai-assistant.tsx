@@ -112,7 +112,7 @@ export default function AiAssistant() {
           });
         }
     }
-  }, [chatState, toast, audioFormAction]);
+  }, [chatState, toast, audioFormAction, startAudioTransition]);
 
    useEffect(() => {
     if (audioState) {
