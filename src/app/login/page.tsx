@@ -52,10 +52,15 @@ export default function LoginPage() {
       toast({ title: 'OTP Sent!', description: `An OTP has been sent to ${phone}` });
     } catch (error: any) {
       console.error("Error sending OTP:", error);
+      let description = error.message || 'Please try again.';
+      if (error.code === 'auth/configuration-not-found') {
+          description = 'Phone sign-in is not enabled for this project. Please enable it in the Firebase Console (Authentication > Sign-in method) and add your domain to the list of authorized domains.';
+      }
+
       toast({
         variant: "destructive",
         title: "Failed to send OTP",
-        description: error.message || 'Please try again.',
+        description: description,
       });
       
       // It's possible for reCAPTCHA to expire, so we can try to re-render it.
