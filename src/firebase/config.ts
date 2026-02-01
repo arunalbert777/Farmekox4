@@ -1,8 +1,7 @@
 import { FirebaseOptions } from 'firebase/app';
 
-// This configuration is from the Firebase project 'farmekox2'.
-// Note: The project ID in the config is 'studio-3740057615-9c79a'.
-// This is an ID assigned by the system.
+// This configuration has been re-verified for the Firebase project 'farmekox2'.
+// The project ID is 'studio-3740057615-9c79a'.
 const firebaseConfig: FirebaseOptions = {
   apiKey: "AIzaSyBleBMfdQUAExxtoOE4aU5cPKktaajNsWg",
   authDomain: "studio-3740057615-9c79a.firebaseapp.com",
