@@ -29,7 +29,7 @@ export default function WeatherCard() {
   };
 
   return (
-    <Card className="lg:col-span-2">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div>
             <CardTitle>7-Day Forecast</CardTitle>

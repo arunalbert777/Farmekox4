@@ -13,7 +13,7 @@ const mandiData = [
 
 export default function MandiPrices() {
   return (
-    <Card className="lg:col-span-2">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
             <div className="grid gap-1">
