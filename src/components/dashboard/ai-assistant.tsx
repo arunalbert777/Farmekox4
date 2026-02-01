@@ -22,8 +22,6 @@ interface Message {
 const initialChatState: { id: string; recommendation: string; language: string } | { error: string } | null = null;
 const initialAudioState: { audio: string } | { error: string } | null = null;
 
-let speechRecognition: SpeechRecognition | null = null;
-
 export default function AiAssistant() {
   const [chatState, chatFormAction, isChatPending] = useActionState(getAiRecommendation, initialChatState);
   const [audioState, audioFormAction, isAudioPending] = useActionState(getAudioForText, initialAudioState);
@@ -39,6 +37,7 @@ export default function AiAssistant() {
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const processedId = useRef<string | null>(null);
+  const speechRecognition = useRef<any>(null);
 
   const handleChatSubmit = useCallback((text: string) => {
     if (text.trim()) {
@@ -54,43 +53,43 @@ export default function AiAssistant() {
   }, [language, chatFormAction, startChatTransition]);
 
   useEffect(() => {
-    if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-      toast({
-        variant: "destructive",
-        title: "Speech Recognition Not Supported",
-        description: "Your browser does not support speech recognition.",
-      });
-      return;
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        speechRecognition.current = new SpeechRecognition();
+        speechRecognition.current.continuous = false;
+        speechRecognition.current.interimResults = false;
+
+        speechRecognition.current.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setIsListening(false);
+          handleChatSubmit(transcript);
+        };
+
+        speechRecognition.current.onerror = (event: any) => {
+          toast({
+            variant: "destructive",
+            title: "Speech Recognition Error",
+            description: event.error,
+          });
+          setIsListening(false);
+        };
+
+        speechRecognition.current.onstart = () => {
+          setIsListening(true);
+        };
+
+        speechRecognition.current.onend = () => {
+          setIsListening(false);
+        };
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Speech Recognition Not Supported",
+          description: "Your browser does not support speech recognition.",
+        });
+      }
     }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    speechRecognition = new SpeechRecognition();
-    speechRecognition.continuous = false;
-    speechRecognition.interimResults = false;
-
-    speechRecognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setIsListening(false);
-      handleChatSubmit(transcript);
-    };
-
-    speechRecognition.onerror = (event) => {
-      toast({
-        variant: "destructive",
-        title: "Speech Recognition Error",
-        description: event.error,
-      });
-      setIsListening(false);
-    };
-
-     speechRecognition.onstart = () => {
-      setIsListening(true);
-    };
-
-    speechRecognition.onend = () => {
-      setIsListening(false);
-    };
-
   }, [toast, handleChatSubmit]);
 
   useEffect(() => {
@@ -157,11 +156,11 @@ export default function AiAssistant() {
 
   const handleMicClick = () => {
     if (isListening) {
-      speechRecognition?.stop();
+      speechRecognition.current?.stop();
     } else {
-      if(speechRecognition) {
-        speechRecognition.lang = language === 'kn' ? 'kn-IN' : 'en-US';
-        speechRecognition.start();
+      if(speechRecognition.current) {
+        speechRecognition.current.lang = language === 'kn' ? 'kn-IN' : 'en-US';
+        speechRecognition.current.start();
       }
     }
   };
