@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useFormState } from 'react-dom';
+import { useState, useRef, useEffect, useActionState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -24,8 +23,8 @@ const initialChatState: { recommendation: string } | { error: string } = { recom
 const initialFertilizerState: { result: string } | { error: string } = { result: '' };
 
 export default function AiAssistant() {
-  const [chatState, chatFormAction] = useFormState(getAiRecommendation, initialChatState);
-  const [fertilizerState, fertilizerFormAction] = useFormState(getFertilizerId, initialFertilizerState);
+  const [chatState, chatFormAction] = useActionState(getAiRecommendation, initialChatState);
+  const [fertilizerState, fertilizerFormAction] = useActionState(getFertilizerId, initialFertilizerState);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const { toast } = useToast();

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { addDays, startOfMonth } from 'date-fns';
+import { useState, useEffect } from 'react';
+import { addDays, startOfMonth, isSameDay } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Calendar, type CalendarProps } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const cropData = {
   rice: {
@@ -28,9 +29,40 @@ type Crop = keyof typeof cropData;
 
 export default function CropCalendar() {
   const [crop, setCrop] = useState<Crop>('rice');
-  const [month, setMonth] = useState(new Date());
+  const [month, setMonth] = useState<Date>();
+  const [today, setToday] = useState<Date | undefined>(undefined);
 
-  const today = new Date();
+  useEffect(() => {
+    const now = new Date();
+    setToday(now);
+    setMonth(now);
+  }, []);
+
+  if (!today || !month) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Crop Calendar</CardTitle>
+          <CardDescription>Sowing and irrigation schedule.</CardDescription>
+          <div className="flex items-center justify-between pt-2">
+            <Skeleton className="h-10 w-[180px]" />
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-2 w-2 rounded-full" /> <Skeleton className="h-4 w-12" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-2 w-2 rounded-full" /> <Skeleton className="h-4 w-16" />
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[298px] w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
   const startOfSelectedMonth = startOfMonth(month);
 
   const sowingDays = cropData[crop].sowing.map(day => addDays(startOfSelectedMonth, day - 1));
@@ -38,11 +70,14 @@ export default function CropCalendar() {
 
   const DayContent: CalendarProps['components'] = {
     Day: ({ date }) => {
-        const isSowingDay = sowingDays.some(d => d.toDateString() === date.toDateString());
-        const isIrrigationDay = irrigationDays.some(d => d.toDateString() === date.toDateString());
+        if (!date) {
+            return <div />;
+        }
+        const isSowingDay = sowingDays.some(d => isSameDay(d, date));
+        const isIrrigationDay = irrigationDays.some(d => isSameDay(d, date));
         
         return (
-            <div className="relative h-full w-full">
+            <div className="relative h-full w-full flex justify-center items-center">
                 <span>{date.getDate()}</span>
                 {(isSowingDay || isIrrigationDay) && (
                     <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
