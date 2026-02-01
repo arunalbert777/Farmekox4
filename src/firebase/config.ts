@@ -2,12 +2,12 @@ import { FirebaseOptions } from 'firebase/app';
 
 // This is the configuration for your new Firebase project.
 const firebaseConfig: FirebaseOptions = {
-  apiKey: "AIzaSyA_this_is_a_new_key_as_requested",
-  authDomain: "farmekox-new-project-2024.firebaseapp.com",
-  projectId: "farmekox-new-project-2024",
-  storageBucket: "farmekox-new-project-2024.appspot.com",
-  messagingSenderId: "998877665544",
-  appId: "1:998877665544:web:fedcba0987654321",
+  apiKey: "AIzaSyBleBMfdQUAExxtoOE4aU5cPKktaajNsWg",
+  authDomain: "studio-3740057615-9c79a.firebaseapp.com",
+  projectId: "studio-3740057615-9c79a",
+  storageBucket: "studio-3740057615-9c79a.firebasestorage.app",
+  messagingSenderId: "169592690307",
+  appId: "1:169592690307:web:ce46bfc82e893d3eba2db6"
 };
 
 export default firebaseConfig;
